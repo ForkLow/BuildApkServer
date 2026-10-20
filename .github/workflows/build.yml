@@ -33,6 +33,13 @@ jobs:
             exit 1
           fi
 
+      # ✅ INI DIA TAMBAHANNYA: Ngedit gradle.properties otomatis dari server
+      - name: Fix Gradle Properties
+        run: |
+          echo "android.newDsl=false" >> my_app/android/gradle.properties
+          echo "android.enableJetifier=true" >> my_app/android/gradle.properties
+          echo "android.useAndroidX=true" >> my_app/android/gradle.properties
+
       - name: Get Dependencies
         run: |
           cd my_app
