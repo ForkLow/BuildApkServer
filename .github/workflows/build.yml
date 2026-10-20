@@ -22,6 +22,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.35.x' # ✅ Pakai versi yang kompatibel dengan AGP 8
           channel: 'stable'
           cache: true
 
@@ -33,12 +34,11 @@ jobs:
             exit 1
           fi
 
-      # ✅ INI DIA TAMBAHANNYA: Ngedit gradle.properties otomatis dari server
-      - name: Fix Gradle Properties
+      - name: Fix Gradle Compatibility
         run: |
           echo "android.newDsl=false" >> my_app/android/gradle.properties
-          echo "android.enableJetifier=true" >> my_app/android/gradle.properties
-          echo "android.useAndroidX=true" >> my_app/android/gradle.properties
+          echo "android.builtInKotlin=false" >> my_app/android/gradle.properties
+          echo "android.enableLegacyVariantApi=false" >> my_app/android/gradle.properties
 
       - name: Get Dependencies
         run: |
