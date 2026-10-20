@@ -1,7 +1,10 @@
 name: Build Flutter APK
 
 on:
-  workflow_dispatch: # Biar bisa ditrigger lewat API dari aplikasi lu
+  workflow_dispatch:
+
+permissions:
+  contents: write # Izin buat bikin Release
 
 jobs:
   build:
@@ -19,12 +22,11 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.x' # Sesuaikan dengan versi Flutter project lu
+          flutter-version: '3.22.x'
           channel: 'stable'
 
       - name: Extract ZIP Project
         run: |
-          # Asumsi file zip diupload ke repo dengan nama project.zip
           unzip project.zip -d my_app
           
       - name: Get Dependencies
@@ -37,8 +39,12 @@ jobs:
           cd my_app
           flutter build apk --release
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+      # INI BAGIAN YANG DIUBAH: Langsung bikin Release GitHub biar dapet link .apk
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: release-apk
-          path: my_app/build/app/outputs/flutter-apk/app-release.apk
+          files: my_app/build/app/outputs/flutter-apk/app-release.apk
+          tag_name: build-${{ github.run_number }}
+          name: Build APK Release ${{ github.run_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
