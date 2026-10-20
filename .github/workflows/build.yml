@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write # Izin buat bikin Release
+  contents: write
 
 jobs:
   build:
@@ -22,13 +22,17 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.x'
+          flutter-version: 'stable' # ✅ Pakai versi paling baru
           channel: 'stable'
 
       - name: Extract ZIP Project
         run: |
-          unzip project.zip -d my_app
-          
+          unzip -q project.zip -d my_app
+          if [ ! -f "my_app/pubspec.yaml" ]; then
+            echo "ERROR: File pubspec.yaml tidak ditemukan!"
+            exit 1
+          fi
+
       - name: Get Dependencies
         run: |
           cd my_app
@@ -39,7 +43,6 @@ jobs:
           cd my_app
           flutter build apk --release
 
-      # INI BAGIAN YANG DIUBAH: Langsung bikin Release GitHub biar dapet link .apk
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
