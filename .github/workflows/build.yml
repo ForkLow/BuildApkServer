@@ -22,7 +22,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.35.x' # ✅ Pakai versi yang kompatibel dengan AGP 8
+          flutter-version: '3.32.x' # ✅ Pakai versi yang kompatibel dengan AGP 8
           channel: 'stable'
           cache: true
 
@@ -48,7 +48,7 @@ jobs:
       - name: Build APK
         run: |
           cd my_app
-          flutter build apk --release
+          flutter build apk --release --verbose
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
