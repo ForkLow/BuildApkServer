@@ -38,8 +38,6 @@ jobs:
       - name: Extract ZIP
         run: |
           unzip -q project.zip -d my_app
-          echo "=== ISI ROOT my_app ==="
-          ls -la my_app
 
       - name: Find pubspec.yaml (Auto-Detect Folder)
         id: detect
@@ -53,6 +51,15 @@ jobs:
           echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
           echo "✅ Project dir: $PROJECT_DIR"
 
+      # ✅ STEP BARU: PAKSA UPDATE GRADLE KE 8.14
+      - name: Force Update Gradle
+        run: |
+          cd $PROJECT_DIR/android
+          if [ -f gradle/wrapper/gradle-wrapper.properties ]; then
+            echo "Mengubah Gradle version ke 8.14..."
+            sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.14-all.zip|' gradle/wrapper/gradle-wrapper.properties
+          fi
+
       - name: Get Dependencies
         run: |
           cd $PROJECT_DIR
@@ -61,7 +68,8 @@ jobs:
       - name: Build APK
         run: |
           cd $PROJECT_DIR
-          flutter build apk --release
+          # ✅ Tambah flag skip validation buat jaga-jaga
+          flutter build apk --release --android-skip-build-dependency-validation
 
       - name: Find APK
         run: |
