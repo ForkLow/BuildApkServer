@@ -4,16 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       jobId:
-        description: 'Job ID dari bot'
         required: true
         type: string
       userId:
-        description: 'User ID Telegram'
         required: true
         type: string
       payload:
-        description: 'Payload data build'
-        required: true
+        required: false
         type: string
 
 permissions:
@@ -38,18 +35,43 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Extract ZIP
+        run: |
+          unzip -q project.zip -d my_app
+          echo "=== ISI ROOT my_app ==="
+          ls -la my_app
+
+      - name: Find pubspec.yaml (Auto-Detect Folder)
+        id: detect
+        run: |
+          PUBSPEC=$(find my_app -name "pubspec.yaml" -type f | head -1)
+          if [ -z "$PUBSPEC" ]; then
+            echo "❌ pubspec.yaml tidak ditemukan"
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$PUBSPEC")
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+          echo "✅ Project dir: $PROJECT_DIR"
+
+      - name: Get Dependencies
+        run: |
+          cd $PROJECT_DIR
+          flutter pub get
+
       - name: Build APK
         run: |
-          # Di sini kamu bisa menggunakan ${{ github.event.inputs.jobId }} atau ${{ inputs.jobId }} jika diperlukan
-          echo "Building untuk job: ${{ github.event.inputs.jobId }}"
+          cd $PROJECT_DIR
+          flutter build apk --release
 
-      # ... sisa step build APK kamu ...
+      - name: Find APK
+        run: |
+          echo "=== SEMUA FILE APK ==="
+          find my_app -name "*.apk" -type f -exec ls -lh {} \;
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          files: my_app/build/app/outputs/flutter-apk/app-release.apk
-          tag_name: build-${{ github.run_number }}
-          name: Build APK Release ${{ github.run_number }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: build-apk-release
+          path: my_app/**/*.apk
+          if-no-files-found: error
+          retention-days: 1
