@@ -2,6 +2,19 @@ name: Build Flutter APK
 
 on:
   workflow_dispatch:
+    inputs:
+      jobId:
+        description: 'Job ID dari bot'
+        required: true
+        type: string
+      userId:
+        description: 'User ID Telegram'
+        required: true
+        type: string
+      payload:
+        description: 'Payload data build'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -22,33 +35,15 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.x' # ✅ Pakai versi yang kompatibel dengan AGP 8
           channel: 'stable'
           cache: true
 
-      - name: Extract ZIP Project
-        run: |
-          unzip -q project.zip -d my_app
-          if [ ! -f "my_app/pubspec.yaml" ]; then
-            echo "ERROR: File pubspec.yaml tidak ditemukan!"
-            exit 1
-          fi
-
-      - name: Fix Gradle Compatibility
-        run: |
-          echo "android.newDsl=false" >> my_app/android/gradle.properties
-          echo "android.builtInKotlin=false" >> my_app/android/gradle.properties
-          echo "android.enableLegacyVariantApi=false" >> my_app/android/gradle.properties
-
-      - name: Get Dependencies
-        run: |
-          cd my_app
-          flutter pub get
-
       - name: Build APK
         run: |
-          cd my_app
-          flutter build apk --release --verbose
+          # Di sini kamu bisa menggunakan ${{ github.event.inputs.jobId }} atau ${{ inputs.jobId }} jika diperlukan
+          echo "Building untuk job: ${{ github.event.inputs.jobId }}"
+
+      # ... sisa step build APK kamu ...
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
